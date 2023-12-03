@@ -11,7 +11,7 @@
 #define MQ_135 35     // Connected to pin 35
 #define FLAME 14      // Connected to pin 14
 #define GAS_PIN 34    // Connected to pin 34
-#define coi 15        // Connected to pin 14
+#define coi 15        // Connected to pin 15
 #define LED 5
 #define RAIN_SENSOR 12
 #define LIGHT 26
@@ -20,11 +20,11 @@ NTPClient timeClient(ntpUDP, "asia.pool.ntp.org", 7 * 60 * 60); // Điều chỉ
 
 DHT dht(DHTPIN, DHTTYPE);
 MQ135 mq135(MQ_135);
-
+Servo servo;
 #define FIREBASE_HOST "android-flutter-8e415-default-rtdb.firebaseio.com"
 #define FIREBASE_AUTH "bZMt8bWQCQK7gfwxSwMI6YROwGVHOxHsoN07itAH"
-#define WIFI_SSID "AE Chung Trọ"
-#define WIFI_PASSWORD "baolauthicho"
+#define WIFI_SSID "Kullhi23"
+#define WIFI_PASSWORD "huyhuyhuy"
 
 FirebaseData fbdo;
 
@@ -119,6 +119,9 @@ struct TimeInfo
   int minute;
 };
 TimeInfo currentTime;
+bool state_curtain_sensor = fasle;
+bool state_curtain_app = fasle;
+
 void loop()
 {
   control_light();
@@ -155,12 +158,29 @@ void warning()
   {
     servo.write(90);
     sentDataRain(true);
+    state_curtain_sensor = true;
   }
   else
   {
     servo.write(0);
     sentDataRain(false);
+    state_curtain_sensor = false;
   }
+  //***************************************************
+  if (Firebase.getBool(fbdo, "home/state_covered", &state_curtain_app))
+  {
+    if (state_curtain_app == true && state_curtain_sensor == false)
+    {
+      servo.write(90);
+      state _curtain_sensor = true;
+    }
+    else if (state_curtain_app == false && state_curtain_sensor == true)
+    {
+      servo.write(0);
+      state _curtain_sensor = false;
+    }
+  }
+  //***************************************************
   Serial.print(gas_value);
   if (flame_sensor_read == 0)
   {
